@@ -1,3 +1,4 @@
+import React from 'react';
 import { RunRecord } from '../types/run-record';
 import { secondsToTime } from './format';
 
@@ -32,10 +33,24 @@ function getFurthestRun(records: RunRecord[] = []): RunRecord {
         .sort((a, b) => (a.fields.Distance > b.fields.Distance ? 1 : -1))[0];
 }
 
-export default function getStats(records: RunRecord[]) {
+export type Stats = {
+    totalRuns: number;
+    avgMileTime: string | undefined;
+    totalMiles: number;
+    furthestRun: RunRecord;
+};
+
+function getStats(records: RunRecord[]): Stats {
     return {
+        totalRuns: records.length,
         avgMileTime: getAveragePace(records),
         totalMiles: getTotalMiles(records),
         furthestRun: getFurthestRun(records),
     };
+}
+
+export default function useStats(records: RunRecord[]): Stats {
+    return React.useMemo(() => {
+        return records ? getStats(records) : ({} as Stats);
+    }, [records]);
 }

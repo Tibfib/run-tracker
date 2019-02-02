@@ -6,7 +6,7 @@ export function useFetch<ReturnType>(
     defaultState: ReturnType
 ) {
     // Some crud state
-    const [loading, setLoading] = React.useState<boolean>(false);
+    const [loading, setLoading] = React.useState<boolean>(true);
     const [error, setError] = React.useState<Error | void>(undefined);
     const [result, setResult] = React.useState<ReturnType | void>(defaultState);
 
