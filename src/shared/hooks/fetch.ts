@@ -22,5 +22,21 @@ export function useFetch<ReturnType>(
         doFetch();
     }, guards);
 
-    return { result, loading, error };
+    return { result, loading, error, refresh: doFetch };
+}
+
+export function useAsyncAction<ReturnType>(doAsyncAction: () => Promise<ReturnType>) {
+    // Some crud state
+    const [loading, setLoading] = React.useState<boolean>(true);
+    const [error, setError] = React.useState<Error | null>(null);
+    const [result, setResult] = React.useState<ReturnType | null>(null);
+
+    async function doAction(): Promise<void | ReturnType> {
+        setLoading(true);
+        const data = await doAsyncAction().catch(setError);
+        setLoading(false);
+        setResult(data || null);
+    }
+
+    return { result, loading, error, doAction };
 }

@@ -17,13 +17,13 @@ type RunRecord = {
 };
 
 export default function Home() {
-    const { result, loading, error } = useFetch<RunRecord[]>(
+    const { result, loading, error, refresh } = useFetch<RunRecord[]>(
         () => listRecords<RunRecord>('appAKclu9CamqSKB4/Table%201', {}),
         ['appAKclu9CamqSKB4/Table%201'],
         []
     );
     const [view, setView] = React.useState<ViewWindow>(ViewWindow.ThisYear);
-    const filteredRuns = useFilter(result ? result : [], view);
+    const filteredRuns: RunRecord[] = useFilter(result ? result : [], view);
     const stats: Stats = useStats(filteredRuns);
 
     return loading ? (
@@ -32,7 +32,7 @@ export default function Home() {
         <div>{error}</div>
     ) : (
         <div className="px4 py1">
-            <div className="flex">
+            <div className="md-flex">
                 <div className="col-8">
                     <div className="flex items-center">
                         <h1>Stats</h1>
@@ -53,7 +53,7 @@ export default function Home() {
                     <div>Total Miles: {stats.totalMiles}</div>
                 </div>
                 <div className="col-4">
-                    <RunList runs={filteredRuns} />
+                    <RunList runs={filteredRuns} onRefreshRecords={refresh} />
                 </div>
             </div>
         </div>

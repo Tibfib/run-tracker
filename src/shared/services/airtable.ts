@@ -18,6 +18,7 @@ function ourFetch<ReturnType>(url: string, options?: RequestInit): Promise<Retur
         ...options,
         headers: {
             Authorization: 'Bearer keyLIxTEY3bWJslOF',
+            ['Content-Type']: 'application/json',
         },
     }).then((response) => response.json());
 }
@@ -43,17 +44,17 @@ export function retrieveRecord<RecordType>(
     return Promise.resolve(undefined);
 }
 
-// function createRecord<RecordType>(table: TablePath, newRecord: RecordType) {
-
-// }
+export function createRecord<RecordType>(table: TablePath, newRecord: RecordType) {
+    return ourFetch<RecordType>(getUrl(table), { method: 'POST', body: JSON.stringify(newRecord) });
+}
 
 // function updateRecord<RecordType>(table: TablePath, newRecord) {
 
 // }
 
-// function deleteRecord(table: TablePath, recordId) {
-
-// }
+export function deleteRecord(table: TablePath, recordId: string) {
+    return ourFetch(getUrl(`${table}/${recordId}`), { method: 'DELTE' });
+}
 
 interface Table<RecordType> {
     listRecords(options: ListRecordsOptions): Promise<RecordType[]>;
@@ -74,5 +75,9 @@ export default class Airtable<RecordType> implements Table<RecordType> {
         options: RetrieveRecordOptions
     ): Promise<RecordType | undefined> {
         return retrieveRecord<RecordType>(this._table, recordId, options);
+    }
+
+    public createRecord(newRecord: RecordType): Promise<RecordType> {
+        return createRecord<RecordType>(this._table, newRecord);
     }
 }
