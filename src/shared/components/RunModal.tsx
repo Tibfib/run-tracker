@@ -6,13 +6,14 @@ import Modal from 'react-modal';
 
 import { RunRecord } from 'src/shared/types/run-record';
 
-import { createRecord } from 'src/shared/services/airtable';
+import table from 'src/shared/services/table';
 
 import { useAsyncAction } from 'src/shared/hooks/fetch';
 
 type Props = {
+    run?: RunRecord;
     isOpen: boolean;
-    setOpen: (isOpen: boolean) => void;
+    onRequestClose: () => void;
     onRefreshRecords: () => void;
 };
 
@@ -31,39 +32,75 @@ const customStyles: Modal.Styles = {
     },
 };
 
+function useSaveRecord(date: Date, duration: number, distance: number, runId?: string) {
+    return useAsyncAction<RunRecord>(() => {
+        const func = runId ? table.updateRecord : table.createRecord;
+
+        return func({
+            id: runId || undefined,
+            fields: {
+                Date: date.toISOString(),
+                Duration: duration,
+                Distance: distance,
+            },
+        } as RunRecord);
+    });
+}
+
+function useDeleteRecord(runId?: string) {
+    return useAsyncAction(() => {
+        return runId ? table.deleteRecord(runId) : Promise.resolve({});
+    });
+}
+
 const times: number[] = new Array(60).fill(false).map((_val, index) => index);
 const padNumber = (num: number): string => (num < 10 ? '0' + num : '' + num);
 
-const AddRunModal: React.SFC<Props> = (props: Props) => {
-    const [date, setDate] = React.useState<Date>(new Date());
-    const [hours, setHours] = React.useState<number>(0);
-    const [minutes, setMinutes] = React.useState<number>(10);
-    const [seconds, setSeconds] = React.useState<number>(0);
-    const [distance, setDistance] = React.useState<number>(0);
+const RunModal: React.SFC<Props> = (props: Props) => {
+    const [date, setDate] = React.useState<Date>(
+        props.run ? new Date(props.run.fields.Date) : new Date()
+    );
+    const [hours, setHours] = React.useState<number>(
+        props.run ? Math.floor((props.run.fields.Duration || 0) / 3600) : 0
+    );
+    const [minutes, setMinutes] = React.useState<number>(
+        props.run ? Math.floor((props.run.fields.Duration || 0) / 60) : 10
+    );
+    const [seconds, setSeconds] = React.useState<number>(
+        props.run ? Math.floor((props.run.fields.Duration || 0) % 60) : 0
+    );
+    const [distance, setDistance] = React.useState<number>(
+        props.run ? props.run.fields.Distance || 0 : 0
+    );
+
     const canSave: boolean =
         date && hours != null && minutes != null && seconds != null && distance != null;
 
-    const { result, loading, error, doAction } = useAsyncAction<RunRecord>(() =>
-        createRecord<RunRecord>('appAKclu9CamqSKB4/Table%201', {
-            fields: {
-                Date: date.toISOString(),
-                Duration: hours * 3600 + minutes * 60 + seconds,
-                Distance: distance,
-            },
-        } as RunRecord)
+    const { result, loading, error, doAction: doSave } = useSaveRecord(
+        date,
+        hours * 3600 + minutes * 60 + seconds,
+        distance,
+        props.run ? props.run.id : undefined
     );
+
+    const {
+        result: deleteResult,
+        loading: deleteLoading,
+        error: deleteError,
+        doAction: doDelete,
+    } = useDeleteRecord(props.run ? props.run.id : undefined);
 
     return (
         <Modal
             isOpen={props.isOpen}
-            onRequestClose={() => props.setOpen(false)}
+            onRequestClose={props.onRequestClose}
             contentLabel="Add a Run"
             style={customStyles}
         >
             <div className="flex items-center mb2">
-                <h2 className="my0">Add a Run</h2>
+                <h2 className="my0">{props.run ? 'Run' : 'Add a Run'}</h2>
                 <div className="flex-auto" />
-                <button onClick={() => props.setOpen(false)}>close</button>
+                <button onClick={props.onRequestClose}>close</button>
             </div>
             <div className="md-flex">
                 <div>
@@ -110,21 +147,32 @@ const AddRunModal: React.SFC<Props> = (props: Props) => {
                 </div>
             </div>
             <div className="mt2 flex">
+                {props.run ? (
+                    <button
+                        onClick={() =>
+                            doDelete()
+                                .then(() => props.onRefreshRecords())
+                                .then(props.onRequestClose)
+                        }
+                    >
+                        Delete
+                    </button>
+                ) : null}
                 <div className="flex-auto" />
                 <button
                     onClick={
                         canSave
                             ? () =>
-                                  doAction()
+                                  doSave()
                                       .then(() => props.onRefreshRecords())
-                                      .then(() => props.setOpen(false))
+                                      .then(props.onRequestClose)
                             : undefined
                     }
                 >
-                    Add
+                    {props.run ? 'Save' : 'Add'}
                 </button>
             </div>
         </Modal>
     );
 };
-export default AddRunModal;
+export default RunModal;

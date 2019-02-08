@@ -1,12 +1,6 @@
-type TablePath = string;
-type RecordId = string;
+import { ListRecordsOptions, RecordInterface, Table } from '../types/table';
 
-type ListRecordsOptions = {
-    [key: string]: any;
-};
-type RetrieveRecordOptions = {
-    [key: string]: any;
-};
+type TablePath = string;
 
 const AIRTABLE_API = 'https://api.airtable.com/v0/';
 function getUrl(table: TablePath) {
@@ -35,49 +29,45 @@ export function listRecords<RecordType>(
         (wrapper) => wrapper.records
     );
 }
-
-export function retrieveRecord<RecordType>(
-    table: TablePath,
-    recordId: RecordId,
-    options: RetrieveRecordOptions
-): Promise<RecordType | undefined> {
-    return Promise.resolve(undefined);
-}
-
 export function createRecord<RecordType>(table: TablePath, newRecord: RecordType) {
     return ourFetch<RecordType>(getUrl(table), { method: 'POST', body: JSON.stringify(newRecord) });
 }
 
-// function updateRecord<RecordType>(table: TablePath, newRecord) {
-
-// }
+export function updateRecord<RecordType extends RecordInterface>(
+    table: TablePath,
+    { id, ...record }: RecordType
+) {
+    return ourFetch<RecordType>(getUrl(`${table}/${id}`), {
+        method: 'PUT',
+        body: JSON.stringify(record),
+    });
+}
 
 export function deleteRecord(table: TablePath, recordId: string) {
-    return ourFetch(getUrl(`${table}/${recordId}`), { method: 'DELTE' });
+    return ourFetch(getUrl(`${table}/${recordId}`), { method: 'DELETE' });
 }
 
-interface Table<RecordType> {
-    listRecords(options: ListRecordsOptions): Promise<RecordType[]>;
-    retrieveRecord(
-        recordId: RecordId,
-        options: RetrieveRecordOptions
-    ): Promise<RecordType | undefined>;
-}
-
-export default class Airtable<RecordType> implements Table<RecordType> {
-    constructor(private _table: TablePath) {}
+export default class Airtable<RecordType extends RecordInterface> implements Table<RecordType> {
+    constructor(private _table: TablePath) {
+        this.listRecords = this.listRecords.bind(this);
+        this.createRecord = this.createRecord.bind(this);
+        this.updateRecord = this.updateRecord.bind(this);
+        this.deleteRecord = this.deleteRecord.bind(this);
+    }
 
     public listRecords(options: ListRecordsOptions): Promise<RecordType[]> {
         return listRecords<RecordType>(this._table, options);
     }
-    public retrieveRecord(
-        recordId: RecordId,
-        options: RetrieveRecordOptions
-    ): Promise<RecordType | undefined> {
-        return retrieveRecord<RecordType>(this._table, recordId, options);
-    }
 
     public createRecord(newRecord: RecordType): Promise<RecordType> {
         return createRecord<RecordType>(this._table, newRecord);
+    }
+
+    public updateRecord(record: RecordType): Promise<RecordType> {
+        return updateRecord<RecordType>(this._table, record);
+    }
+
+    public deleteRecord(recordId: string): Promise<any> {
+        return deleteRecord(this._table, recordId);
     }
 }
