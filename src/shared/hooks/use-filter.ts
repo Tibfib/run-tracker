@@ -1,7 +1,8 @@
+import { isSameMonth, isSameWeek, isSameYear, subMonths, subWeeks, subYears } from 'date-fns';
 import React from 'react';
-import { ViewWindow } from '../types/view-windows';
-import { isSameWeek, isSameYear, isSameMonth, subMonths, subWeeks, subYears } from 'date-fns';
-import { RunRecord } from '../types/run-record';
+
+import { RunRecord } from 'src/shared/types/run-record';
+import { ViewWindow } from 'src/shared/types/view-windows';
 
 export function getFilteredRuns(records: RunRecord[], view: ViewWindow): RunRecord[] {
     return records.filter((record) => {

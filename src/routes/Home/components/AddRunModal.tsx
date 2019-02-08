@@ -1,11 +1,14 @@
+import 'react-datepicker/dist/react-datepicker.css';
+
 import * as React from 'react';
 import DatePicker from 'react-datepicker';
-
-import 'react-datepicker/dist/react-datepicker.css';
 import Modal from 'react-modal';
-import { useAsyncAction } from '../../../shared/hooks/fetch';
-import { createRecord } from '../../../shared/services/airtable';
-import { RunRecord } from '../../../shared/types/run-record';
+
+import { RunRecord } from 'src/shared/types/run-record';
+
+import { createRecord } from 'src/shared/services/airtable';
+
+import { useAsyncAction } from 'src/shared/hooks/fetch';
 
 type Props = {
     isOpen: boolean;

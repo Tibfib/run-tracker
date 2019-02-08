@@ -1,6 +1,9 @@
 import * as React from 'react';
-import { RunRecord } from '../../../shared/types/run-record';
-import { secondsToTime } from '../../../shared/services/format';
+
+import { RunRecord } from 'src/shared/types/run-record';
+
+import { secondsToTime } from 'src/shared/services/format';
+
 import AddRunModal from './AddRunModal';
 
 type Props = {

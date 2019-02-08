@@ -1,10 +1,14 @@
 import * as React from 'react';
-import { listRecords } from '../../shared/services/airtable';
-import { useFetch } from '../../shared/hooks/fetch';
-import useStats, { Stats } from '../../shared/services/stats';
+
+import { ViewWindow, ViewWindowOptions } from 'src/shared/types/view-windows';
+
+import { listRecords } from 'src/shared/services/airtable';
+import useStats, { Stats } from 'src/shared/services/stats';
+
+import { useFetch } from 'src/shared/hooks/fetch';
+import useFilter from 'src/shared/hooks/use-filter';
+
 import RunList from './components/RunList';
-import { ViewWindow, ViewWindowOptions } from '../../shared/types/view-windows';
-import useFilter from '../../shared/hooks/use-filter';
 
 type RunRecord = {
     createdTime: string;

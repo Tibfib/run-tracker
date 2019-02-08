@@ -17,7 +17,7 @@ function ourFetch<ReturnType>(url: string, options?: RequestInit): Promise<Retur
     return fetch(url, {
         ...options,
         headers: {
-            Authorization: 'Bearer keyLIxTEY3bWJslOF',
+            Authorization: `Bearer ${process.env.REACT_APP_AIRTABLE_AUTH_TOKEN}`,
             ['Content-Type']: 'application/json',
         },
     }).then((response) => response.json());

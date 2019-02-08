@@ -1,5 +1,7 @@
 import React from 'react';
-import { RunRecord } from '../types/run-record';
+
+import { RunRecord } from 'src/shared/types/run-record';
+
 import { secondsToTime } from './format';
 
 function isValidRun(record: RunRecord): boolean {
